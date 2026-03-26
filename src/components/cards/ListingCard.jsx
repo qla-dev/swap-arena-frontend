@@ -17,7 +17,7 @@ const ListingCard = ({
   horizontal = false
 }) => {
   const theme = useTheme();
-  const width = horizontal ? 232 : compact ? 164 : '100%';
+  const width = horizontal ? 232 : '100%';
 
   return (
     <Pressable
@@ -100,9 +100,11 @@ const ListingCard = ({
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: theme.spacing.md }}>
           <View style={{ flex: 1, gap: theme.spacing.xs }}>
-            <AppText variant="card" numberOfLines={2}>
-              {listing.title}
-            </AppText>
+            <View style={{ minHeight: theme.typography.cardTitle.lineHeight * 2 }}>
+              <AppText variant="card" numberOfLines={2}>
+                {listing.title}
+              </AppText>
+            </View>
             <AppText variant="micro" color={theme.colors.textSecondary}>
               {listing.seller.name} - {listing.distance}
             </AppText>
