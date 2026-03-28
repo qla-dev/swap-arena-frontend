@@ -17,7 +17,8 @@ const Input = React.forwardRef(({
   right,
   style,
   inputStyle,
-  helperText
+  helperText,
+  ...props
 }, ref) => {
   const theme = useTheme();
 
@@ -53,6 +54,7 @@ const Input = React.forwardRef(({
           multiline={multiline}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
+          {...props}
           style={[
             {
               flex: 1,

@@ -346,6 +346,7 @@ const HomeScreen = () => {
       id: `story-${Date.now()}`,
       username: 'Your Story',
       avatar: listing.seller.avatar,
+      avatarConfig: listing.seller.avatarConfig || null,
       offerImage: listing.imageUrl,
       offerTitle: listing.title,
       offerPrice: listing.price,
@@ -669,7 +670,7 @@ const HomeScreen = () => {
           >
             {selectedStory ? (
               <>
-                <Image source={{ uri: selectedStory.offerImage }} style={{ width: '100%', height: 360 }} />
+          <Image source={{ uri: selectedStory.offerImage }} style={{ width: '100%', height: 360 }} />
                 <View style={{ padding: theme.spacing.xxl, gap: theme.spacing.md }}>
                   <View style={{ gap: theme.spacing.xs }}>
                     <AppText variant="section">{selectedStory.offerTitle}</AppText>

@@ -659,6 +659,7 @@ const ChatViewScreen = () => {
         >
           <Avatar
             uri={conversation.participant.avatar}
+            avatarConfig={conversation.participant.avatarConfig}
             label={conversation.participant.name}
             online={conversation.online}
             premium={conversation.participant.isPremium}

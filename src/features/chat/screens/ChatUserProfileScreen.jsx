@@ -87,6 +87,7 @@ const ChatUserProfileScreen = () => {
         >
           <Avatar
             uri={participant.avatar}
+            avatarConfig={participant.avatarConfig}
             label={participant.name}
             size={88}
             premium={participant.isPremium}

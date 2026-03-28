@@ -62,6 +62,7 @@ const ChatListScreen = () => {
             >
               <Avatar
                 uri={item.participant.avatar}
+                avatarConfig={item.participant.avatarConfig}
                 label={item.participant.name}
                 online={item.online}
                 premium={item.participant.isPremium}

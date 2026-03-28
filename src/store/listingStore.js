@@ -34,6 +34,47 @@ const useListingStore = create((set, get) => ({
   myStoreListingIds,
   savedOfferIds: savedOfferSeedIds,
   transactions: initialTransactions,
+  syncCurrentUserProfile: ({ userId, avatar, avatarConfig }) =>
+    set((state) => {
+      const profilePatch = {
+        avatar: avatar || null,
+        avatarConfig: avatarConfig || null
+      };
+      const listings = state.listings.map((item) =>
+        item.seller.id === userId
+          ? {
+              ...item,
+              seller: {
+                ...item.seller,
+                ...profilePatch
+              }
+            }
+          : item
+      );
+      const stories = state.stories.map((story) =>
+        story.isSelf
+          ? {
+              ...story,
+              ...profilePatch
+            }
+          : story
+      );
+
+      return {
+        listings,
+        stories,
+        homeFeed: {
+          ...state.homeFeed,
+          stories
+        },
+        discoveryFeed: computeDiscoveryFeed(
+          listings,
+          state.filters,
+          state.wishlistIds,
+          state.swipedIds
+        )
+      };
+    }),
   toggleSavedOffer: (listingId) =>
     set((state) => ({
       savedOfferIds: state.savedOfferIds.includes(listingId)

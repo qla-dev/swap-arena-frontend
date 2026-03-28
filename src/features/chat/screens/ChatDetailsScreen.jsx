@@ -262,6 +262,7 @@ const ChatDetailsScreen = () => {
           >
             <Avatar
               uri={conversation.participant.avatar}
+              avatarConfig={conversation.participant.avatarConfig}
               label={conversation.participant.name}
               size={84}
               premium={conversation.participant.isPremium}

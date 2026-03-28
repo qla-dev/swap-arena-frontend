@@ -253,6 +253,7 @@ const ListingDetailScreen = () => {
           >
             <Avatar
               uri={listing.seller.avatar}
+              avatarConfig={listing.seller.avatarConfig}
               label={listing.seller.name}
               premium={listing.seller.isPremium}
             />

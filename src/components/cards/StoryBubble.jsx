@@ -1,8 +1,9 @@
 import React from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '@/app/ThemeProvider';
+import Avatar from '@/components/ui/Avatar';
 import AppText from '@/components/ui/AppText';
 
 const StoryBubble = ({
@@ -50,9 +51,11 @@ const StoryBubble = ({
               borderColor: theme.colors.borderStrong
             }}
           >
-            <Image
-              source={{ uri: story.avatar }}
-              style={{ width: 62, height: 62, borderRadius: 31, position: 'absolute' }}
+            <Avatar
+              uri={story.avatar}
+              avatarConfig={story.avatarConfig}
+              label={story.username}
+              size={62}
             />
             <View
               style={{
@@ -73,16 +76,23 @@ const StoryBubble = ({
             </View>
           </View>
         ) : (
-          <Image
-            source={{ uri: story.avatar }}
+          <View
             style={{
               width: 66,
               height: 66,
               borderRadius: 33,
               borderWidth: 2,
-              borderColor: theme.colors.background
+              borderColor: theme.colors.background,
+              overflow: 'hidden'
             }}
-          />
+          >
+            <Avatar
+              uri={story.avatar}
+              avatarConfig={story.avatarConfig}
+              label={story.username}
+              size={66}
+            />
+          </View>
         )}
       </View>
       <AppText
