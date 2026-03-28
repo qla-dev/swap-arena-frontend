@@ -31,13 +31,8 @@ const ChatListScreen = () => {
 
   return (
     <ScreenContainer noPadding>
-      <View style={{ flex: 1, paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.md, gap: theme.spacing.lg }}>
-        <View style={{ gap: theme.spacing.xs }}>
-          <AppText variant="page">Messages</AppText>
-          <AppText variant="body" color={theme.colors.textSecondary}>
-            Real-time conversations, offer threads, and unread chat activity.
-          </AppText>
-        </View>
+      <View style={{ flex: 1, paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.xxl, gap: theme.spacing.lg }}>
+        <AppText variant="page">Messages</AppText>
 
         <Input
           value={query}

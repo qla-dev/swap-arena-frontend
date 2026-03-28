@@ -19,7 +19,16 @@
     "plugins": [
       "expo-asset",
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      "expo-audio",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to use your camera so you can capture chat photos and videos.",
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos so you can share media in chat.",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone so you can record videos and voice messages."
+        }
+      ]
     ]
   }
 }
