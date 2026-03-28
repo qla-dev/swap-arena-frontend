@@ -1,5 +1,6 @@
 import React from 'react';
-import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/app/ThemeProvider';
 
@@ -42,7 +43,7 @@ const ScreenContainer = ({
   );
 
   return (
-    <SafeAreaView style={[{ flex: 1, backgroundColor: theme.colors.background }, style]}>
+    <SafeAreaView edges={['top']} style={[{ flex: 1, backgroundColor: theme.colors.background }, style]}>
       {keyboard ? (
         <KeyboardAvoidingView
           style={{ flex: 1 }}

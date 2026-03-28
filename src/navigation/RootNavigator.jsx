@@ -39,6 +39,10 @@ const RootNavigator = () => {
             getComponent={() => require('../features/chat/screens/ChatDetailsScreen').default}
           />
           <Stack.Screen
+            name="ChatUserProfile"
+            getComponent={() => require('../features/chat/screens/ChatUserProfileScreen').default}
+          />
+          <Stack.Screen
             name="Wishlist"
             getComponent={() => require('../features/wishlist/screens/WishlistScreen').default}
           />

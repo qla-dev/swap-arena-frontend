@@ -4,7 +4,7 @@ import { TextInput, View } from 'react-native';
 import { useTheme } from '@/app/ThemeProvider';
 import AppText from '@/components/ui/AppText';
 
-const Input = ({
+const Input = React.forwardRef(({
   label,
   value,
   onChangeText,
@@ -18,7 +18,7 @@ const Input = ({
   style,
   inputStyle,
   helperText
-}) => {
+}, ref) => {
   const theme = useTheme();
 
   return (
@@ -44,6 +44,7 @@ const Input = ({
       >
         {left ? <View style={{ marginTop: multiline ? 2 : 0 }}>{left}</View> : null}
         <TextInput
+          ref={ref}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
@@ -73,6 +74,8 @@ const Input = ({
       ) : null}
     </View>
   );
-};
+});
+
+Input.displayName = 'Input';
 
 export default Input;
