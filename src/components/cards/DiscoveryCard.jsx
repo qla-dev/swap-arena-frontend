@@ -1,11 +1,9 @@
 import React from 'react';
-import { Dimensions, ImageBackground, Pressable, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { PanGestureHandler } from 'react-native-gesture-handler';
+import { ImageBackground, Pressable, View, useWindowDimensions } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   interpolate,
   runOnJS,
-  useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -15,10 +13,6 @@ import Animated, {
 import { useTheme } from '@/app/ThemeProvider';
 import Badge from '@/components/ui/Badge';
 import AppText from '@/components/ui/AppText';
-import { formatCurrency } from '@/utils/formatters';
-
-const { width: screenWidth } = Dimensions.get('window');
-const SWIPE_THRESHOLD = screenWidth * 0.24;
 
 const DiscoveryCard = ({
   listing,
@@ -29,57 +23,64 @@ const DiscoveryCard = ({
   onSwipeRight
 }) => {
   const theme = useTheme();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const cardWidth = Math.min(windowWidth - theme.spacing.xxl * 2, 388);
+  const cardHeight = Math.min(
+    Math.max(cardWidth * 1.22, 404),
+    windowHeight * 0.58
+  );
+  const swipeThreshold = cardWidth * 0.24;
+
   const translateX = useSharedValue(0);
-  const translateY = useSharedValue(index * 6);
+  const startX = useSharedValue(0);
   const rotate = useSharedValue(0);
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, ctx) => {
-      ctx.startX = translateX.value;
-    },
-    onActive: (event, ctx) => {
-      if (!isTop) {
-        return;
-      }
-      translateX.value = ctx.startX + event.translationX;
+  const panGesture = Gesture.Pan()
+    .enabled(isTop)
+    .onBegin(() => {
+      startX.value = translateX.value;
+    })
+    .onUpdate((event) => {
+      translateX.value = startX.value + event.translationX;
       rotate.value = interpolate(translateX.value, [-240, 0, 240], [-10, 0, 10]);
-    },
-    onEnd: () => {
-      if (!isTop) {
-        return;
-      }
-
-      if (translateX.value > SWIPE_THRESHOLD) {
-        translateX.value = withTiming(screenWidth * 1.2, { duration: 180 }, () => {
+    })
+    .onEnd(() => {
+      if (translateX.value > swipeThreshold) {
+        translateX.value = withTiming(windowWidth * 1.2, { duration: 180 }, () => {
           runOnJS(onSwipeRight)();
-          translateX.value = 0;
-          rotate.value = 0;
         });
         return;
       }
 
-      if (translateX.value < -SWIPE_THRESHOLD) {
-        translateX.value = withTiming(-screenWidth * 1.2, { duration: 180 }, () => {
+      if (translateX.value < -swipeThreshold) {
+        translateX.value = withTiming(-windowWidth * 1.2, { duration: 180 }, () => {
           runOnJS(onSwipeLeft)();
-          translateX.value = 0;
-          rotate.value = 0;
         });
         return;
       }
 
       translateX.value = withSpring(0);
       rotate.value = withSpring(0);
-    }
-  });
+    });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: translateX.value },
-      { translateY: withSpring(translateY.value) },
+      {
+        translateY: withSpring(index * 10, {
+          damping: 18,
+          stiffness: 180
+        })
+      },
       { rotate: `${rotate.value}deg` },
-      { scale: withSpring(isTop ? 1 : 0.96 - index * 0.03) }
+      {
+        scale: withSpring(isTop ? 1 : 0.96 - index * 0.02, {
+          damping: 18,
+          stiffness: 180
+        })
+      }
     ],
-    opacity: withSpring(index > 2 ? 0 : 1)
+    opacity: withTiming(index > 2 ? 0 : 1, { duration: 180 })
   }));
 
   const rightLabelStyle = useAnimatedStyle(() => ({
@@ -91,13 +92,14 @@ const DiscoveryCard = ({
   }));
 
   return (
-    <PanGestureHandler enabled={isTop} onGestureEvent={gestureHandler}>
+    <GestureDetector gesture={panGesture}>
       <Animated.View
         style={[
           {
             position: 'absolute',
-            width: screenWidth - 40,
-            height: 540,
+            width: cardWidth,
+            height: cardHeight,
+            zIndex: 10 - index,
             borderRadius: theme.radius.xxl,
             overflow: 'hidden',
             borderWidth: 1,
@@ -119,6 +121,7 @@ const DiscoveryCard = ({
                 backgroundColor: 'rgba(0,0,0,0.28)'
               }}
             />
+
             <Animated.View
               style={[
                 {
@@ -137,9 +140,10 @@ const DiscoveryCard = ({
               ]}
             >
               <AppText variant="section" color={theme.colors.success}>
-                SWAP
+                WISHLIST
               </AppText>
             </Animated.View>
+
             <Animated.View
               style={[
                 {
@@ -158,14 +162,14 @@ const DiscoveryCard = ({
               ]}
             >
               <AppText variant="section" color={theme.colors.danger}>
-                PASS
+                SKIP
               </AppText>
             </Animated.View>
 
             <View
               style={{
                 padding: theme.spacing.xxl,
-                gap: theme.spacing.lg,
+                gap: theme.spacing.md,
                 backgroundColor: 'rgba(0,0,0,0.52)'
               }}
             >
@@ -174,41 +178,21 @@ const DiscoveryCard = ({
                   <Badge key={`${listing.id}-${platform}`} label={platform} tone="primary" />
                 ))}
               </View>
-              <View style={{ gap: theme.spacing.sm }}>
+
+              <View style={{ gap: theme.spacing.xs }}>
                 <AppText variant="hero" color={theme.colors.white}>
                   {listing.title}
                 </AppText>
-                <AppText variant="body" color="rgba(255,255,255,0.82)" numberOfLines={2}>
-                  {listing.description}
-                </AppText>
               </View>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <View style={{ gap: theme.spacing.xs }}>
-                  <AppText variant="bodyBold" color={theme.colors.white}>
-                    {formatCurrency(listing.price)}
-                  </AppText>
-                  <AppText variant="micro" color="rgba(255,255,255,0.72)">
-                    {listing.seller.name} - {listing.region}
-                  </AppText>
-                </View>
-                <View
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 22,
-                    backgroundColor: 'rgba(255,255,255,0.18)',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                  }}
-                >
-                  <Ionicons name="information-circle-outline" size={24} color={theme.colors.white} />
-                </View>
-              </View>
+
+              <AppText variant="body" color="rgba(255,255,255,0.82)" numberOfLines={2}>
+                {listing.description}
+              </AppText>
             </View>
           </ImageBackground>
         </Pressable>
       </Animated.View>
-    </PanGestureHandler>
+    </GestureDetector>
   );
 };
 

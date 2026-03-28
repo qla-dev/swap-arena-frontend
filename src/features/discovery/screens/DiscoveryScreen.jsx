@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -14,11 +14,19 @@ import useListingStore from '@/store/listingStore';
 const DiscoveryScreen = () => {
   const navigation = useNavigation();
   const theme = useTheme();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const discoveryFeed = useListingStore((state) => state.discoveryFeed);
-  const filters = useListingStore((state) => state.filters);
   const swipeListing = useListingStore((state) => state.swipeListing);
   const resetDiscovery = useListingStore((state) => state.resetDiscovery);
   const [mode, setMode] = useState('games');
+  const cardWidth = Math.min(windowWidth - theme.spacing.xxl * 2, 388);
+  const cardHeight = Math.min(
+    Math.max(cardWidth * 1.22, 404),
+    windowHeight * 0.58
+  );
+  const deckHeight = cardHeight + theme.spacing.lg;
+  const deckTopGapMin = theme.spacing.huge + theme.spacing.sm;
+  const deckBottomGapMin = theme.spacing.huge * 2;
 
   const filteredItems = useMemo(() => {
     if (mode === 'gear') {
@@ -28,14 +36,12 @@ const DiscoveryScreen = () => {
     return discoveryFeed.filter((item) => !item.platform.includes('Gear'));
   }, [discoveryFeed, mode]);
 
-  const activeItem = filteredItems[0];
-
-  const handleSwipe = (direction) => {
-    if (!activeItem) {
+  const handleSwipe = (listingId, direction) => {
+    if (!listingId) {
       return;
     }
 
-    const result = swipeListing(activeItem.id, direction);
+    const result = swipeListing(listingId, direction);
     if (result && result.ok === false) {
       Alert.alert('Wishlist limit reached', result.message, [
         { text: 'Later', style: 'cancel' },
@@ -46,15 +52,26 @@ const DiscoveryScreen = () => {
 
   return (
     <ScreenContainer noPadding>
-      <View style={{ flex: 1, paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.md }}>
-        <View style={{ gap: theme.spacing.sm }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <View style={{ gap: theme.spacing.xs, flex: 1 }}>
-              <AppText variant="page">Discovery</AppText>
-              <AppText variant="body" color={theme.colors.textSecondary}>
-                Swipe by platform, region, and wishlist-aware recommendations.
-              </AppText>
-            </View>
+      <View
+        style={{
+          flex: 1,
+          paddingHorizontal: theme.spacing.lg,
+          paddingTop: theme.spacing.xxl,
+          paddingBottom: theme.spacing.huge
+        }}
+      >
+        <View style={{ gap: theme.spacing.lg }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: theme.spacing.md
+            }}
+          >
+            <AppText variant="page" style={{ flex: 1 }}>
+              Discovery
+            </AppText>
             <Button
               variant="secondary"
               size="icon"
@@ -82,88 +99,52 @@ const DiscoveryScreen = () => {
               Gear
             </Button>
           </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              paddingVertical: theme.spacing.sm
-            }}
-          >
-            <AppText variant="micro" color={theme.colors.textMuted}>
-              {filters.region} {filters.platform ? `- ${filters.platform}` : ''}
-            </AppText>
-            <AppText variant="micro" color={theme.colors.textMuted}>
-              {filteredItems.length} cards left
-            </AppText>
-          </View>
         </View>
 
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{
+            flex: 1,
+            width: '100%'
+          }}
+        >
           {filteredItems.length ? (
             <>
-              {filteredItems
-                .slice(0, 3)
-                .map((item, index) => (
-                  <DiscoveryCard
-                    key={item.id}
-                    listing={item}
-                    index={index}
-                    isTop={index === 0}
-                    onPress={() => navigation.navigate('ListingDetail', { listingId: item.id })}
-                    onSwipeLeft={() => handleSwipe('left')}
-                    onSwipeRight={() => handleSwipe('right')}
-                  />
-                ))
-                .reverse()}
+              <View style={{ flex: 1, minHeight: deckTopGapMin }} />
+              <View
+                style={{
+                  height: deckHeight,
+                  alignItems: 'center',
+                  justifyContent: 'flex-start'
+                }}
+              >
+                {filteredItems
+                  .slice(0, 3)
+                  .map((item, index) => (
+                    <DiscoveryCard
+                      key={item.id}
+                      listing={item}
+                      index={index}
+                      isTop={index === 0}
+                      onPress={() => navigation.navigate('ListingDetail', { listingId: item.id })}
+                      onSwipeLeft={() => handleSwipe(item.id, 'left')}
+                      onSwipeRight={() => handleSwipe(item.id, 'right')}
+                    />
+                  ))
+                  .reverse()}
+              </View>
+              <View style={{ flex: 2, minHeight: deckBottomGapMin }} />
             </>
           ) : (
-            <EmptyState
-              title="No more discovery cards"
-              description="You have already processed every available item for the current mode and filters."
-              actionLabel="Reset Discovery"
-              onPress={resetDiscovery}
-            />
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+              <EmptyState
+                title="No more discovery cards"
+                description="You have already processed every available item for the current mode and filters."
+                actionLabel="Reset Discovery"
+                onPress={resetDiscovery}
+              />
+            </View>
           )}
         </View>
-
-        {activeItem ? (
-          <View
-            style={{
-              paddingBottom: theme.spacing.huge,
-              gap: theme.spacing.md
-            }}
-          >
-            <View style={{ flexDirection: 'row', gap: theme.spacing.md }}>
-              <Button
-                variant="secondary"
-                size="lg"
-                style={{ flex: 1 }}
-                onPress={() => handleSwipe('left')}
-                left={<Ionicons name="close-outline" size={20} color={theme.colors.textPrimary} />}
-              >
-                Skip
-              </Button>
-              <Button
-                variant="primary"
-                size="lg"
-                style={{ flex: 1 }}
-                onPress={() => handleSwipe('right')}
-                left={<Ionicons name="heart" size={18} color={theme.colors.white} />}
-              >
-                Wishlist
-              </Button>
-            </View>
-            <Button
-              variant="ghost"
-              size="sm"
-              onPress={() => navigation.navigate('ListingDetail', { listingId: activeItem.id })}
-            >
-              View Full Listing
-            </Button>
-          </View>
-        ) : null}
       </View>
     </ScreenContainer>
   );
